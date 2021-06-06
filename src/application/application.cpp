@@ -119,6 +119,7 @@ void Application::LoadData() {
   // create training metric
   if (config_.is_provide_training_metric) {
     for (auto metric_type : config_.metric) {
+      Log::Info("metric_type is %s", metric_type.c_str());
       auto metric = std::unique_ptr<Metric>(Metric::CreateMetric(metric_type, config_));
       if (metric == nullptr) { continue; }
       metric->Init(train_data_->metadata(), train_data_->num_data());
@@ -254,6 +255,27 @@ void Application::Predict() {
     predictor.Predict(config_.data.c_str(),
                       config_.output_result.c_str(), config_.header, config_.predict_disable_shape_check,
                       config_.precise_float_parser);
+
+      std::vector<double> results;
+      std::ifstream file(config_.output_result.c_str());
+      double result;
+      while(file >> result) {
+          results.push_back(result);
+      }
+
+      DatasetLoader dataset_loader(config_, nullptr, 2, config_.data.c_str());
+      train_data_.reset(dataset_loader.LoadFromFile(config_.data.c_str(), 0, 1));
+      auto metric = std::unique_ptr<Metric>(Metric::CreateMetric("auc", config_));
+      if (metric != nullptr) {
+          metric->Init(train_data_->metadata(), train_data_->num_data());
+          std::vector<double> auc = metric->Eval(results.data(), nullptr);
+          for (auto d : auc) {
+              Log::Info("auc is %3.10f", d);
+          }
+      }
+
+      Log::Info("size is %d", results.size());
+
     Log::Info("Finished prediction");
   }
 }
