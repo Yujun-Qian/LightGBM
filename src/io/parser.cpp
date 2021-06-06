@@ -225,7 +225,7 @@ DataType GetDataType(const char* filename, bool header,
     int max_col_idx = GetNumColFromLIBSVMFile(filename, header);
     *num_col = max_col_idx + 1;
   } else if (type == DataType::CSV) {
-    *num_col = comma_cnt + 1;
+    *num_col = comma_cnt + colon_cnt + 1;
   } else if (type == DataType::TSV) {
     *num_col = tab_cnt + 1;
   }
