@@ -10,7 +10,7 @@
 
 namespace LightGBM {
 
-void GetStatistic(const char* str, int* comma_cnt, int* tab_cnt, int* colon_cnt) {
+void GetStatistic(const char* str, int* comma_cnt, int* tab_cnt, int* colon_cnt, int* semicolon_cnt) {
   *comma_cnt = 0;
   *tab_cnt = 0;
   *colon_cnt = 0;
@@ -21,6 +21,8 @@ void GetStatistic(const char* str, int* comma_cnt, int* tab_cnt, int* colon_cnt)
       ++(*tab_cnt);
     } else if (str[i] == ':') {
       ++(*colon_cnt);
+    } else if (str[i] == ';') {
+      ++(*semicolon_cnt);
     }
   }
 }
@@ -183,7 +185,8 @@ DataType GetDataType(const char* filename, bool header,
   int comma_cnt = 0;
   int tab_cnt = 0;
   int colon_cnt = 0;
-  GetStatistic(lines[0].c_str(), &comma_cnt, &tab_cnt, &colon_cnt);
+  int semicolon_cnt = 0;
+  GetStatistic(lines[0].c_str(), &comma_cnt, &tab_cnt, &colon_cnt, &semicolon_cnt);
   if (lines.size() == 1) {
     if (colon_cnt > 0) {
       type = DataType::LIBSVM;
@@ -196,7 +199,8 @@ DataType GetDataType(const char* filename, bool header,
     int comma_cnt2 = 0;
     int tab_cnt2 = 0;
     int colon_cnt2 = 0;
-    GetStatistic(lines[1].c_str(), &comma_cnt2, &tab_cnt2, &colon_cnt2);
+    int semicolon_cnt2 = 0;
+    GetStatistic(lines[1].c_str(), &comma_cnt2, &tab_cnt2, &colon_cnt2, &semicolon_cnt2);
     if (colon_cnt > 0 || colon_cnt2 > 0) {
       type = DataType::LIBSVM;
     } else if (tab_cnt == tab_cnt2 && tab_cnt > 0) {
@@ -210,7 +214,7 @@ DataType GetDataType(const char* filename, bool header,
     if (type == DataType::TSV || type == DataType::CSV) {
       // valid the type
       for (size_t i = 2; i < lines.size(); ++i) {
-        GetStatistic(lines[i].c_str(), &comma_cnt2, &tab_cnt2, &colon_cnt2);
+        GetStatistic(lines[i].c_str(), &comma_cnt2, &tab_cnt2, &colon_cnt2, &semicolon_cnt2);
         if (type == DataType::TSV && tab_cnt2 != tab_cnt) {
           type = DataType::INVALID;
           break;
@@ -225,7 +229,7 @@ DataType GetDataType(const char* filename, bool header,
     int max_col_idx = GetNumColFromLIBSVMFile(filename, header);
     *num_col = max_col_idx + 1;
   } else if (type == DataType::CSV) {
-    *num_col = comma_cnt + colon_cnt + 1;
+    *num_col = comma_cnt + semicolon_cnt + 1;
   } else if (type == DataType::TSV) {
     *num_col = tab_cnt + 1;
   }
