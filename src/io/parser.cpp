@@ -57,7 +57,7 @@ int GetLabelIdxForCSV(const std::string& str, int num_features, int label_idx) {
     return label_idx;
   }
   auto str2 = Common::Trim(str);
-  auto tokens = Common::Split(str2.c_str(), ',');
+  auto tokens = Common::Split1(str2.c_str(), ',', ';');
   if (static_cast<int>(tokens.size()) == num_features) {
     return -1;
   } else {
@@ -204,6 +204,9 @@ DataType GetDataType(const char* filename, bool header,
     } else if (comma_cnt == comma_cnt2 && comma_cnt > 0) {
       type = DataType::CSV;
     }
+
+    type = DataType::CSV;
+
     if (type == DataType::TSV || type == DataType::CSV) {
       // valid the type
       for (size_t i = 2; i < lines.size(); ++i) {

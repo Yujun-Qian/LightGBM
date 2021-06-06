@@ -123,6 +123,28 @@ inline static std::vector<std::string> Split(const char* c_str, char delimiter) 
   return ret;
 }
 
+    inline static std::vector<std::string> Split1(const char* c_str, char delimiter1, char delemiter2) {
+        std::vector<std::string> ret;
+        std::string str(c_str);
+        size_t i = 0;
+        size_t pos = 0;
+        while (pos < str.length()) {
+            if (str[pos] == delimiter1 || str[pos] == delemiter2) {
+                if (i < pos) {
+                    ret.push_back(str.substr(i, pos - i));
+                }
+                ++pos;
+                i = pos;
+            } else {
+                ++pos;
+            }
+        }
+        if (i < pos) {
+            ret.push_back(str.substr(i));
+        }
+        return ret;
+    }
+
 inline static std::vector<std::string> SplitBrackets(const char* c_str, char left_delimiter, char right_delimiter) {
   std::vector<std::string> ret;
   std::string str(c_str);
@@ -306,7 +328,7 @@ inline static const char* Atof(const char* p, double* out) {
     while (*(p + cnt) != '\0' && *(p + cnt) != ' '
            && *(p + cnt) != '\t' && *(p + cnt) != ','
            && *(p + cnt) != '\n' && *(p + cnt) != '\r'
-           && *(p + cnt) != ':') {
+           && *(p + cnt) != ':' && *(p + cnt) != ';') {
       ++cnt;
     }
     if (cnt > 0) {

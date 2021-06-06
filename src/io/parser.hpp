@@ -35,7 +35,7 @@ class CSVParser: public Parser {
         out_features->emplace_back(idx + offset, val);
       }
       ++idx;
-      if (*str == ',') {
+      if (*str == ',' || *str == ';') {
         ++str;
       } else if (*str != '\0') {
         Log::Fatal("Input format error when parsing as CSV");
