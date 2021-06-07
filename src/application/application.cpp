@@ -274,6 +274,52 @@ void Application::Predict() {
           }
       }
 
+      const label_t* label = train_data_->metadata().label();
+      float threshold;
+      for (threshold = 0.05; threshold < 1.0; threshold += 0.5) {
+          int TP = 0;
+          int FP = 0;
+          int TN = 0;
+          int FN = 0;
+          float precision = 0;
+          float recall = 0;
+          float F1 = 0;
+
+          for (data_size_t i = 0; i < train_data_->num_data(); ++i) {
+              int label_ = 0;
+              int predict = 0;
+              if (label[i] < 0.1) {
+                  label_ = 0;
+              } else if (label[i] > 0.9) {
+                  label_ = 1;
+              } else {
+                  Log::Info("warning, label is %3.10f", label[i]);
+              }
+
+              if (results[i] >= threshold) {
+                  predict = 1;
+              }
+
+              if (label_ == 0 && predict == 0) {
+                  TN++;
+              } else if (label_ == 0 && predict == 1) {
+                  FP++;
+              } else if (label_ == 1 && predict == 0) {
+                  FN++;
+              } else if (label_ == 1 && predict == 1) {
+                  TP++;
+              }
+          }
+
+          precision = (float)TP / ((float)TP + (float)FP);
+          recall = (float)TP / ((float)TP + (float)FN);
+
+          F1 = 2.0 * precision * recall / (precision + recall);
+
+          Log::Info("threshold is %3.10f, precision : %3.10f, recall : %3.10f, F1 : %3.10f",
+                    threshold, precision, recall, F1);
+      }
+
       Log::Info("size is %d", results.size());
 
     Log::Info("Finished prediction");
