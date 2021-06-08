@@ -276,13 +276,14 @@ void Application::Predict() {
 
       const label_t* label = train_data_->metadata().label();
       float threshold;
-      for (threshold = 0.05; threshold < 1.0; threshold += 0.5) {
+      for (threshold = 0.05; threshold < 1.0; threshold += 0.01) {
           int TP = 0;
           int FP = 0;
           int TN = 0;
           int FN = 0;
           float precision = 0;
           float recall = 0;
+          float FPR = 0;
           float F1 = 0;
 
           for (data_size_t i = 0; i < train_data_->num_data(); ++i) {
@@ -313,11 +314,12 @@ void Application::Predict() {
 
           precision = (float)TP / ((float)TP + (float)FP);
           recall = (float)TP / ((float)TP + (float)FN);
+          FPR = (float)FP / ((float)FP + (float)TN);
 
           F1 = 2.0 * precision * recall / (precision + recall);
 
-          Log::Info("threshold is %3.10f, precision : %3.10f, recall : %3.10f, F1 : %3.10f",
-                    threshold, precision, recall, F1);
+          Log::Info("threshold is %3.10f, precision: %3.10f, recall: %3.10f, FPR: %3.10f, F1: %3.10f",
+                    threshold, precision, recall, FPR, F1);
       }
 
       Log::Info("size is %d", results.size());
